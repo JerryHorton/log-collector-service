@@ -1,0 +1,5 @@
+spring:
+  config:
+    name: log-center-app
+  profiles:
+    active: dev
