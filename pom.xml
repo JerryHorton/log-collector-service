@@ -17,7 +17,7 @@
     </modules>
 
     <repositories>
-        <receiverEndpointRepository>
+        <repository>
             <id>nexus-aliyun</id>
             <name>nexus-aliyun</name>
             <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
@@ -27,7 +27,7 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-        </receiverEndpointRepository>
+        </repository>
     </repositories>
 
     <properties>
