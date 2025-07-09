@@ -38,10 +38,16 @@
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+
+
         <!-- 系统模块 -->
         <dependency>
             <groupId>cn.cug.sxy</groupId>
-            <artifactId>log-center-types</artifactId>
+            <artifactId>log-collector-service-types</artifactId>
         </dependency>
     </dependencies>
 

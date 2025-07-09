@@ -1,1 +1,1 @@
-package cn.cug.sxy.domain.xxx.service;
+package cn.cug.sxy.domain.reception.service;

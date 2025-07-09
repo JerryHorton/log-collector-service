@@ -11,6 +11,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
         </dependency>
@@ -21,7 +25,7 @@
         <!-- 系统模块 -->
         <dependency>
             <groupId>cn.cug.sxy</groupId>
-            <artifactId>log-center-domain</artifactId>
+            <artifactId>log-collector-service-domain</artifactId>
         </dependency>
     </dependencies>
 

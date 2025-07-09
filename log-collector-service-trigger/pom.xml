@@ -34,7 +34,7 @@
         </dependency>
         <dependency>
             <groupId>cn.cug.sxy</groupId>
-            <artifactId>log-center-types</artifactId>
+            <artifactId>log-collector-service-types</artifactId>
         </dependency>
         <dependency>
             <groupId>cn.cug.sxy</groupId>

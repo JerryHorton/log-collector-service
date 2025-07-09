@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cug.sxy.infrastructure.dao.ILogReceiverEndpointDao">
+
+    <resultMap id="dataMap" type="cn.cug.sxy.infrastructure.dao.po.LogReceiverEndpoint">
+        <id column="id" property="id"/>
+        <result column="endpoint_id" property="endpointId"/>
+        <result column="name" property="name"/>
+        <result column="type" property="type"/>
+        <result column="protocol" property="protocol"/>
+        <result column="path" property="path"/>
+        <result column="port" property="port"/>
+        <result column="format" property="format"/>
+        <result column="max_payload_size" property="maxPayloadSize"/>
+        <result column="compression_enabled" property="compressionEnabled"/>
+        <result column="compression_algorithm" property="compressionAlgorithm"/>
+        <result column="status" property="status"/>
+        <result column="allowed_app_Ids" property="allowedAppIds"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+    </resultMap>
+
+    <select id="selectById" parameterType="cn.cug.sxy.infrastructure.dao.po.LogReceiverEndpoint">
+        select endpoint_id,
+               name,
+               type,
+               protocol,
+               path,
+               port,
+               format,
+               max_payload_size,
+               compression_enabled,
+               compression_algorithm,
+               status,
+               allowed_app_Ids
+        from log_receiver_endpoint
+        where endpoint_id = #{endpointId}
+    </select>
+
+
+</mapper>

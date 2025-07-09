@@ -82,11 +82,11 @@
         <!-- 工程模块；启动依赖 trigger->domain, infrastructure-->
         <dependency>
             <groupId>cn.cug.sxy</groupId>
-            <artifactId>log-center-trigger</artifactId>
+            <artifactId>log-collector-service-trigger</artifactId>
         </dependency>
         <dependency>
             <groupId>cn.cug.sxy</groupId>
-            <artifactId>log-center-infrastructure</artifactId>
+            <artifactId>log-collector-service-infrastructure</artifactId>
         </dependency>
     </dependencies>
 

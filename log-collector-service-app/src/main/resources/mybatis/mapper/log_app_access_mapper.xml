@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cug.sxy.infrastructure.dao.ILogAppAccessDao">
+
+    <resultMap id="dataMap" type="cn.cug.sxy.infrastructure.dao.po.LogAppAccess">
+        <id column="id" property="id"/>
+        <result column="app_id" property="appId"/>
+        <result column="app_name" property="appName"/>
+        <result column="access_key" property="accessKey"/>
+        <result column="secret_key" property="secretKey"/>
+        <result column="allowed_endpoints" property="allowedEndpoints"/>
+        <result column="ip_whitelist" property="ipWhitelist"/>
+        <result column="rate_limit" property="rateLimit"/>
+        <result column="status" property="status"/>
+        <result column="expiry_time" property="expiryTime"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+    </resultMap>
+
+    <select id="selectById" parameterType="java.lang.String" resultMap="dataMap">
+        select app_id,
+               app_name,
+               access_key,
+               secret_key,
+               allowed_endpoints,
+               ip_whitelist,
+               rate_limit,
+               status,
+               expiry_time,
+               created_time,
+               updated_time
+        from log_app_access
+        where app_id = #{appId}
+    </select>
+
+
+</mapper>
