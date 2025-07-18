@@ -1,5 +1,6 @@
 package cn.cug.sxy.types.exception;
 
+import cn.cug.sxy.types.enums.ResponseCode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -9,10 +10,14 @@ public class AppException extends RuntimeException {
 
     private static final long serialVersionUID = 5317680961212299217L;
 
-    /** 异常码 */
+    /**
+     * 异常码
+     */
     private String code;
 
-    /** 异常信息 */
+    /**
+     * 异常信息
+     */
     private String info;
 
     public AppException(String code) {
@@ -32,6 +37,17 @@ public class AppException extends RuntimeException {
     public AppException(String code, String message, Throwable cause) {
         this.code = code;
         this.info = message;
+        super.initCause(cause);
+    }
+
+    public AppException(ResponseCode code) {
+        this.code = code.getCode();
+        this.info = code.getInfo();
+    }
+
+    public AppException(ResponseCode code, Throwable cause) {
+        this.code = code.getCode();
+        this.info = code.getInfo();
         super.initCause(cause);
     }
 

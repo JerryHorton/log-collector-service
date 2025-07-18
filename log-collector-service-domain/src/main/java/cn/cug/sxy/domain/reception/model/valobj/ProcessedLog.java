@@ -1,5 +1,6 @@
 package cn.cug.sxy.domain.reception.model.valobj;
 
+import cn.cug.sxy.domain.auth.model.valobj.AppId;
 import cn.cug.sxy.types.model.ValueObject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -22,28 +23,24 @@ public class ProcessedLog implements ValueObject {
 
     // 日志内容
     private final String content;
-
     // 日志格式
     private final LogFormat format;
-
     // 元数据
     private Map<String, String> metadata;
-
     // 所属应用ID
-    private final AppId appId;
-
+    private final String appId;
     // 接收端点ID
-    private final EndpointId endpointId;
-
+    private final String endpointId;
+    // 来源ID
+    private final String sourceId;
+    // 时间戳
+    private final Instant timestamp;
     // 处理时间
     private final Instant processTime;
-
     // 是否通过验证
     private boolean validated;
-
     // 验证失败原因
     private String validationFailReason;
-
     // 提取的结构化字段
     private Map<String, Object> structuredFields;
 
@@ -58,12 +55,14 @@ public class ProcessedLog implements ValueObject {
      * @param processTime 处理时间
      */
     public ProcessedLog(String content, LogFormat format, Map<String, String> metadata,
-                        AppId appId, EndpointId endpointId, Instant processTime) {
+                        String appId, String endpointId, String sourceId, Instant timestamp, Instant processTime) {
         this.content = content;
         this.format = format;
         this.metadata = new HashMap<>(metadata);
         this.appId = appId;
         this.endpointId = endpointId;
+        this.sourceId = sourceId;
+        this.timestamp = timestamp;
         this.processTime = processTime;
         this.validated = true; // 默认为已验证通过
         this.structuredFields = new HashMap<>();
@@ -169,7 +168,7 @@ public class ProcessedLog implements ValueObject {
      * @return 日志标识符
      */
     private String getLogIdentifier() {
-        return "appId=" + appId.getValue() + ", endpointId=" + endpointId.getValue();
+        return "appId=" + appId + ", endpointId=" + endpointId;
     }
 
 }

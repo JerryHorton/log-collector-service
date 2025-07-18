@@ -1,5 +1,6 @@
 package cn.cug.sxy.domain.storage.service;
 
+import cn.cug.sxy.domain.reception.model.entity.LogBatchEntity;
 import cn.cug.sxy.domain.reception.model.valobj.BatchId;
 import cn.cug.sxy.domain.reception.model.valobj.BatchStatus;
 import cn.cug.sxy.domain.storage.model.valobj.StorageLog;
@@ -18,11 +19,11 @@ public interface ILogStorageService {
     /**
      * 存储日志批次
      *
-     * @param batchId 批次ID
+     * @param batch 批次
      * @param logs 日志列表
      * @return 批次跟踪ID
      */
-    String storeBatch(BatchId batchId, List<StorageLog> logs);
+    String storeBatch(LogBatchEntity batch, List<StorageLog> logs);
 
     /**
      * 确认批次是否已存储

@@ -1,8 +1,8 @@
 package cn.cug.sxy.domain.reception.alc;
 
 import cn.cug.sxy.domain.preprocess.service.ILogPreprocessService;
-import cn.cug.sxy.domain.reception.model.entity.LogBatch;
-import cn.cug.sxy.domain.reception.model.valobj.AppId;
+import cn.cug.sxy.domain.reception.model.entity.LogBatchEntity;
+import cn.cug.sxy.domain.auth.model.valobj.AppId;
 import cn.cug.sxy.domain.reception.model.valobj.EndpointId;
 import cn.cug.sxy.domain.reception.model.valobj.ProcessedLog;
 import cn.cug.sxy.domain.reception.model.valobj.RawLog;
@@ -37,7 +37,7 @@ public class PreprocessGateway implements IPreprocessGateway {
     }
 
     @Override
-    public List<ProcessedLog> preprocessFromBatch(LogBatch batch) {
-        return List.of();
+    public List<ProcessedLog> preprocessFromBatch(LogBatchEntity batch) {
+        return logPreprocessService.preprocessFromBatch(batch);
     }
 }

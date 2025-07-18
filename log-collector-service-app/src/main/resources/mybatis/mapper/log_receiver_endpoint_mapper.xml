@@ -20,7 +20,7 @@
         <result column="updated_time" property="updatedTime"/>
     </resultMap>
 
-    <select id="selectById" parameterType="cn.cug.sxy.infrastructure.dao.po.LogReceiverEndpoint">
+    <select id="selectById" parameterType="cn.cug.sxy.infrastructure.dao.po.LogReceiverEndpoint" resultMap="dataMap">
         select endpoint_id,
                name,
                type,

@@ -1,8 +1,6 @@
 package cn.cug.sxy.domain.preprocess.service;
 
-import cn.cug.sxy.domain.reception.model.entity.LogBatch;
-import cn.cug.sxy.domain.reception.model.valobj.AppId;
-import cn.cug.sxy.domain.reception.model.valobj.EndpointId;
+import cn.cug.sxy.domain.reception.model.entity.LogBatchEntity;
 import cn.cug.sxy.domain.reception.model.valobj.ProcessedLog;
 import cn.cug.sxy.domain.reception.model.valobj.RawLog;
 
@@ -25,7 +23,7 @@ public interface ILogPreprocessService {
      * @param endpointId 端点ID
      * @return 处理后的日志
      */
-    ProcessedLog preprocess(RawLog rawLog, AppId appId, EndpointId endpointId);
+    ProcessedLog preprocess(RawLog rawLog, String appId, String endpointId);
 
     /**
      * 批量预处理日志
@@ -35,7 +33,7 @@ public interface ILogPreprocessService {
      * @param endpointId 端点ID
      * @return 处理后的日志列表
      */
-    List<ProcessedLog> preprocessBatch(List<RawLog> rawLogs, AppId appId, EndpointId endpointId);
+    List<ProcessedLog> preprocessBatch(List<RawLog> rawLogs, String appId, String endpointId);
 
     /**
      * 从批次中预处理日志
@@ -43,6 +41,6 @@ public interface ILogPreprocessService {
      * @param batch 日志批次
      * @return 处理后的日志列表
      */
-    List<ProcessedLog> preprocessFromBatch(LogBatch batch);
+    List<ProcessedLog> preprocessFromBatch(LogBatchEntity batch);
 
 }

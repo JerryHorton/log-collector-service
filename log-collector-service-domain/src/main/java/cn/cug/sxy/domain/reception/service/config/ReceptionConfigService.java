@@ -2,7 +2,7 @@ package cn.cug.sxy.domain.reception.service.config;
 
 import cn.cug.sxy.domain.reception.adapter.repository.IReceiverEndpointRepository;
 import cn.cug.sxy.domain.reception.model.aggregate.ReceiverEndpoint;
-import cn.cug.sxy.domain.reception.model.valobj.AppId;
+import cn.cug.sxy.domain.auth.model.valobj.AppId;
 import cn.cug.sxy.domain.reception.model.valobj.EndpointId;
 import cn.cug.sxy.domain.reception.model.valobj.EndpointStatus;
 import jakarta.annotation.PostConstruct;
@@ -29,9 +29,6 @@ public class ReceptionConfigService {
     
     // 缓存端点配置
     private final Map<EndpointId, EndpointConfig> endpointConfigCache = new ConcurrentHashMap<>();
-    
-    // 缓存应用-端点限流配置
-    private final Map<String, RateLimitConfig> rateLimitConfigCache = new ConcurrentHashMap<>();
     
     // 配置刷新调度器
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -68,7 +65,7 @@ public class ReceptionConfigService {
             List<ReceiverEndpoint> endpoints = endpointRepository.findAll();
             for (ReceiverEndpoint endpoint : endpoints) {
                 EndpointConfig config = new EndpointConfig(
-                        endpoint.getAppId(),
+                        endpoint.getEndpointId(),
                         endpoint.getName(),
                         endpoint.getFormat(),
                         endpoint.getStatus(),
@@ -76,10 +73,7 @@ public class ReceptionConfigService {
                         calculateMaxBatchSize(endpoint),
                         endpoint.getMaxBatchCount()
                 );
-                endpointConfigCache.put(endpoint.getAppId(), config);
-                
-                // 刷新该端点的应用限流配置
-                refreshRateLimitConfigs(endpoint);
+                endpointConfigCache.put(endpoint.getEndpointId(), config);
             }
             
             log.info("接收配置刷新完成，共加载{}个端点配置", endpointConfigCache.size());
@@ -88,22 +82,7 @@ public class ReceptionConfigService {
         }
     }
     
-    /**
-     * 刷新端点的应用限流配置
-     */
-    private void refreshRateLimitConfigs(ReceiverEndpoint endpoint) {
-        // 获取端点的所有应用访问权限
-        endpoint.getAppAccesses().forEach(appAccess -> {
-            String key = generateRateLimitKey(appAccess.getAppId(), endpoint.getAppId());
-            RateLimitConfig config = new RateLimitConfig(
-                    appAccess.getAppId(),
-                    endpoint.getAppId(),
-                    appAccess.getRateLimit(),
-                    appAccess.getBurstCapacity()
-            );
-            rateLimitConfigCache.put(key, config);
-        });
-    }
+
     
     /**
      * 获取端点配置
@@ -120,7 +99,7 @@ public class ReceptionConfigService {
             if (endpointOpt.isPresent()) {
                 ReceiverEndpoint endpoint = endpointOpt.get();
                 config = new EndpointConfig(
-                        endpoint.getAppId(),
+                        endpoint.getEndpointId(),
                         endpoint.getName(),
                         endpoint.getFormat(),
                         endpoint.getStatus(),
@@ -129,25 +108,10 @@ public class ReceptionConfigService {
                         endpoint.getMaxBatchCount()
                 );
                 endpointConfigCache.put(endpointId, config);
-                
-                // 同时刷新该端点的应用限流配置
-                refreshRateLimitConfigs(endpoint);
             }
         }
         
         return config;
-    }
-    
-    /**
-     * 获取应用-端点限流配置
-     * 
-     * @param appId 应用ID
-     * @param endpointId 端点ID
-     * @return 限流配置，如果不存在则返回null
-     */
-    public RateLimitConfig getRateLimitConfig(AppId appId, EndpointId endpointId) {
-        String key = generateRateLimitKey(appId, endpointId);
-        return rateLimitConfigCache.get(key);
     }
     
     /**
@@ -182,4 +146,5 @@ public class ReceptionConfigService {
     private String generateRateLimitKey(AppId appId, EndpointId endpointId) {
         return appId.getValue() + ":" + endpointId.getValue();
     }
+
 } 

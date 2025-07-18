@@ -4,7 +4,7 @@ import cn.cug.sxy.domain.reception.adapter.repository.IReceiverEndpointRepositor
 import cn.cug.sxy.domain.reception.model.entity.ReceptionDynamicContext;
 import cn.cug.sxy.domain.reception.model.valobj.*;
 import cn.cug.sxy.domain.reception.service.buffer.LogBufferManager;
-import cn.cug.sxy.domain.reception.service.rule.chain.ILogicChain;
+import cn.cug.sxy.types.framework.chain.ILogicChain;
 import cn.cug.sxy.domain.reception.service.rule.chain.factory.DefaultLogicChainFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -70,7 +70,7 @@ public class LogReceptionService implements ILogReceptionService, InitializingBe
 
     @Override
     @SuppressWarnings("unchecked")
-    public ReceptionResult receiveLog(RawLog rawLog, AppId appId, EndpointId endpointId) {
+    public ReceptionResult receiveLog(RawLog rawLog, String appId, String endpointId) {
         ILogicChain<ReceptionRequest, ReceptionResult, ReceptionDynamicContext> logicChain =
                 (ILogicChain<ReceptionRequest, ReceptionResult, ReceptionDynamicContext>)
                         logicChainFactory.openLogicChain(DefaultLogicChainFactory.RuleType.RECEPTION_SINGLETON_RULE.getCode());
@@ -85,7 +85,7 @@ public class LogReceptionService implements ILogReceptionService, InitializingBe
 
     @Override
     @SuppressWarnings("unchecked")
-    public ReceptionResult receiveBatch(List<RawLog> rawLogs, AppId appId, EndpointId endpointId) {
+    public ReceptionResult receiveBatch(List<RawLog> rawLogs, String appId, String endpointId) {
         ILogicChain<ReceptionRequest, ReceptionResult, ReceptionDynamicContext> logicChain =
                 (ILogicChain<ReceptionRequest, ReceptionResult, ReceptionDynamicContext>)
                         logicChainFactory.openLogicChain(DefaultLogicChainFactory.RuleType.RECEPTION_BATCH_RULE.getCode());

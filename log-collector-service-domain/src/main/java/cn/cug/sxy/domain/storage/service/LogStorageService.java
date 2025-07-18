@@ -1,8 +1,11 @@
 package cn.cug.sxy.domain.storage.service;
 
+import cn.cug.sxy.domain.reception.adapter.repository.ILogBatchRepository;
+import cn.cug.sxy.domain.reception.model.entity.LogBatchEntity;
 import cn.cug.sxy.domain.reception.model.valobj.BatchId;
 import cn.cug.sxy.domain.reception.model.valobj.BatchStatus;
 import cn.cug.sxy.domain.storage.model.valobj.StorageLog;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,12 +17,19 @@ import java.util.List;
  * @Author jerryhotton
  */
 
+@Slf4j
 @Service
 public class LogStorageService implements ILogStorageService {
 
+    private final ILogBatchRepository logBatchRepository;
+
+    public LogStorageService(ILogBatchRepository logBatchRepository) {
+        this.logBatchRepository = logBatchRepository;
+    }
+
     @Override
-    public String storeBatch(BatchId batchId, List<StorageLog> logs) {
-        return "";
+    public String storeBatch(LogBatchEntity batch, List<StorageLog> logs) {
+        return logBatchRepository.storeBatch(batch, logs);
     }
 
     @Override
@@ -36,4 +46,5 @@ public class LogStorageService implements ILogStorageService {
     public boolean storeLog(StorageLog log) {
         return false;
     }
+
 }

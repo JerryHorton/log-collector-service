@@ -11,6 +11,7 @@
         <result column="allowed_endpoints" property="allowedEndpoints"/>
         <result column="ip_whitelist" property="ipWhitelist"/>
         <result column="rate_limit" property="rateLimit"/>
+        <result column="burst_capacity" property="burstCapacity"/>
         <result column="status" property="status"/>
         <result column="expiry_time" property="expiryTime"/>
         <result column="created_time" property="createdTime"/>
@@ -25,6 +26,7 @@
                allowed_endpoints,
                ip_whitelist,
                rate_limit,
+               burst_capacity,
                status,
                expiry_time,
                created_time,
@@ -33,5 +35,21 @@
         where app_id = #{appId}
     </select>
 
+    <select id="selectByAccessKey" parameterType="java.lang.String" resultMap="dataMap">
+        select app_id,
+               app_name,
+               access_key,
+               secret_key,
+               allowed_endpoints,
+               ip_whitelist,
+               rate_limit,
+               burst_capacity,
+               status,
+               expiry_time,
+               created_time,
+               updated_time
+        from log_app_access
+        where access_key = #{accessKey}
+    </select>
 
 </mapper>

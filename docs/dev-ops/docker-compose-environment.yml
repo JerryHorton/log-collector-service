@@ -81,6 +81,22 @@ services:
       redis:
         condition: service_healthy
 
+  elasticsearch:
+    image: elasticsearch:7.17.14
+    ports:
+      - '9200:9200'
+      - '9300:9300'
+    container_name: elasticsearch
+    restart: always
+    environment:
+      - 'cluster.name=elasticsearch' # 设置集群名称为elasticsearch
+      - 'discovery.type=single-node' # 以单一节点模式启动
+      - "cluster.name=docker-cluster" # 设置名称
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m' # 设置使用jvm内存大小
+    networks:
+      - my-network
+
+
 networks:
   my-network:
     driver: bridge

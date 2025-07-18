@@ -21,7 +21,7 @@ public interface ILogReceptionService {
      * @param endpointId 端点ID
      * @return 日志接收结果
      */
-    ReceptionResult receiveLog(RawLog rawLog, AppId appId, EndpointId endpointId);
+    ReceptionResult receiveLog(RawLog rawLog, String appId, String endpointId);
 
     /**
      * 批量接收原始日志
@@ -31,7 +31,7 @@ public interface ILogReceptionService {
      * @param endpointId 端点ID
      * @return 日志接收结果
      */
-    ReceptionResult receiveBatch(List<RawLog> rawLogs, AppId appId, EndpointId endpointId);
+    ReceptionResult receiveBatch(List<RawLog> rawLogs, String appId, String endpointId);
 
     /**
      * 处理接收到的日志批次

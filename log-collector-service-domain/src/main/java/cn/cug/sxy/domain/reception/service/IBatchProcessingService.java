@@ -1,5 +1,6 @@
 package cn.cug.sxy.domain.reception.service;
 
+import cn.cug.sxy.domain.reception.model.entity.LogBatchEntity;
 import cn.cug.sxy.domain.reception.model.valobj.BatchId;
 
 /**
@@ -20,8 +21,8 @@ public interface IBatchProcessingService {
      * 3. 状态追踪 - 记录批次处理的状态和结果
      * 4. 领域边界 - 将日志批次传递给存储/分析领域进行后续处理
      *
-     * @param batchId 批次ID
+     * @param batchEntity 批次
      */
-    void processBatchAsync(BatchId batchId);
+    void processBatchAsync(LogBatchEntity batchEntity);
 
 }

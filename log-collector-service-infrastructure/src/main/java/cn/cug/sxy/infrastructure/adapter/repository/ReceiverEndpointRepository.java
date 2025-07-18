@@ -38,7 +38,7 @@ public class ReceiverEndpointRepository extends AbstractRepository implements IR
         if (null == endpointId) {
             return Optional.empty();
         }
-        String cacheKey = Constants.RedisKey.RECEIVER_ENDPOINT + endpointId.getValue();
+        String cacheKey = Constants.RedisKey.RECEIVER_ENDPOINT_KEY + endpointId.getValue();
         LogReceiverEndpoint po = getDataFromCacheOrDB(cacheKey, () -> receiverEndpointDao.selectById(endpointId.getValue()));
         if (null == po) {
             return Optional.empty();

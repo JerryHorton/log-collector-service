@@ -2,7 +2,7 @@ package cn.cug.sxy.domain.preprocess.service;
 
 import cn.cug.sxy.domain.preprocess.service.strategy.IPreprocessStrategy;
 import cn.cug.sxy.domain.preprocess.service.strategy.PreprocessStrategyFactory;
-import cn.cug.sxy.domain.reception.model.entity.LogBatch;
+import cn.cug.sxy.domain.reception.model.entity.LogBatchEntity;
 import cn.cug.sxy.domain.reception.model.valobj.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ public class LogPreprocessService implements ILogPreprocessService {
     }
 
     @Override
-    public ProcessedLog preprocess(RawLog rawLog, AppId appId, EndpointId endpointId) {
+    public ProcessedLog preprocess(RawLog rawLog, String appId, String endpointId) {
         try {
             // 1. 创建基础的处理后日志对象
             ProcessedLog processedLog = new ProcessedLog(
@@ -40,6 +40,8 @@ public class LogPreprocessService implements ILogPreprocessService {
                     rawLog.getMetadata(),
                     appId,
                     endpointId,
+                    rawLog.getSourceId(),
+                    rawLog.getTimestamp(),
                     Instant.now()
             );
             // 2. 根据日志格式获取对应的预处理策略
@@ -52,7 +54,7 @@ public class LogPreprocessService implements ILogPreprocessService {
             return processedLog;
         } catch (Exception e) {
             log.error("预处理日志失败: appId={}, endpointId={}, error={}",
-                    appId.getValue(), endpointId.getValue(), e.getMessage(), e);
+                    appId, endpointId, e.getMessage(), e);
             // 创建一个标记为失败的处理后日志
             ProcessedLog failedLog = new ProcessedLog(
                     rawLog.getContent(),
@@ -60,6 +62,8 @@ public class LogPreprocessService implements ILogPreprocessService {
                     rawLog.getMetadata(),
                     appId,
                     endpointId,
+                    rawLog.getSourceId(),
+                    rawLog.getTimestamp(),
                     Instant.now()
             );
             failedLog.markValidationFailed("预处理失败: " + e.getMessage());
@@ -68,7 +72,7 @@ public class LogPreprocessService implements ILogPreprocessService {
     }
 
     @Override
-    public List<ProcessedLog> preprocessBatch(List<RawLog> rawLogs, AppId appId, EndpointId endpointId) {
+    public List<ProcessedLog> preprocessBatch(List<RawLog> rawLogs, String appId, String endpointId) {
         // 按日志格式分组，以便批量处理相同格式的日志
         Map<LogFormat, List<RawLog>> logsByFormat = rawLogs.stream()
                 .collect(Collectors.groupingBy(RawLog::getFormat));
@@ -90,6 +94,8 @@ public class LogPreprocessService implements ILogPreprocessService {
                             rawLog.getMetadata(),
                             appId,
                             endpointId,
+                            rawLog.getSourceId(),
+                            rawLog.getTimestamp(),
                             Instant.now()
                     ));
                 }
@@ -108,7 +114,7 @@ public class LogPreprocessService implements ILogPreprocessService {
     }
 
     @Override
-    public List<ProcessedLog> preprocessFromBatch(LogBatch batch) {
+    public List<ProcessedLog> preprocessFromBatch(LogBatchEntity batch) {
         return preprocessBatch(batch.getLogs(), batch.getAppId(), batch.getEndpointId());
     }
 

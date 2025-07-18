@@ -1,9 +1,13 @@
 package cn.cug.sxy.domain.reception.adapter.repository;
 
-import cn.cug.sxy.domain.reception.model.entity.LogBatch;
-import cn.cug.sxy.domain.reception.model.valobj.AppId;
+import cn.cug.sxy.domain.reception.model.entity.LogBatchEntity;
+import cn.cug.sxy.domain.auth.model.valobj.AppId;
 import cn.cug.sxy.domain.reception.model.valobj.BatchId;
 import cn.cug.sxy.domain.reception.model.valobj.BatchStatus;
+import cn.cug.sxy.domain.storage.model.entity.LogDocument;
+import cn.cug.sxy.domain.storage.model.valobj.LogQuery;
+import cn.cug.sxy.domain.storage.model.valobj.LogQueryResult;
+import cn.cug.sxy.domain.storage.model.valobj.StorageLog;
 import cn.cug.sxy.types.model.Page;
 
 import java.time.Instant;
@@ -23,9 +27,9 @@ public interface ILogBatchRepository {
     /**
      * 保存日志批次
      *
-     * @param logBatch 日志批次实体
+     * @param logBatchEntity 日志批次实体
      */
-    void save(LogBatch logBatch);
+    void save(LogBatchEntity logBatchEntity);
 
     /**
      * 根据ID查找日志批次
@@ -33,7 +37,9 @@ public interface ILogBatchRepository {
      * @param batchId 批次ID
      * @return 日志批次实体
      */
-    Optional<LogBatch> findById(BatchId batchId);
+    Optional<LogBatchEntity> findByBatchId(BatchId batchId);
+
+    Optional<LogBatchEntity> findByBatchId(String batchId, boolean loadLogs);
 
     /**
      * 根据应用ID和状态查找日志批次
@@ -42,7 +48,7 @@ public interface ILogBatchRepository {
      * @param status 批次状态
      * @return 日志批次列表
      */
-    List<LogBatch> findByAppIdAndStatus(AppId appId, BatchStatus status);
+    List<LogBatchEntity> findByAppIdAndStatus(AppId appId, BatchStatus status);
 
     /**
      * 根据时间范围和状态查找日志批次
@@ -54,8 +60,8 @@ public interface ILogBatchRepository {
      * @param pageSize   页大小
      * @return 分页日志批次列表
      */
-    Page<LogBatch> findByTimeRangeAndStatus(Instant startTime, Instant endTime,
-                                            BatchStatus status, int pageNumber, int pageSize);
+    Page<LogBatchEntity> findByTimeRangeAndStatus(Instant startTime, Instant endTime,
+                                                  BatchStatus status, int pageNumber, int pageSize);
 
     /**
      * 更新批次状态
@@ -81,7 +87,7 @@ public interface ILogBatchRepository {
      * @param before 处理时间截止点
      * @return 批次列表
      */
-    List<LogBatch> findByStatusAndProcessedTimeBefore(BatchStatus status, Instant before);
+    List<LogBatchEntity> findByStatusAndProcessedTimeBefore(BatchStatus status, Instant before);
 
     /**
      * 根据状态和最后处理时间查找批次
@@ -90,7 +96,7 @@ public interface ILogBatchRepository {
      * @param before 最后处理时间截止点
      * @return 批次列表
      */
-    List<LogBatch> findByStatusAndLastProcessTimeBefore(BatchStatus status, Instant before);
+    List<LogBatchEntity> findByStatusAndLastProcessTimeBefore(BatchStatus status, Instant before);
 
     /**
      * 更新批次状态和处理时间
@@ -133,14 +139,14 @@ public interface ILogBatchRepository {
      *
      * @param batch 批次
      */
-    void delete(LogBatch batch);
+    void delete(LogBatchEntity batch);
 
     /**
      * 查询所有批次
      *
      * @return 所有批次列表
      */
-    List<LogBatch> findAll();
+    List<LogBatchEntity> findAll();
 
     /**
      * 统计各状态批次数量
@@ -148,5 +154,11 @@ public interface ILogBatchRepository {
      * @return 状态-数量映射
      */
     Map<BatchStatus, Long> countByStatus();
+
+    String storeBatch(LogBatchEntity batch, List<StorageLog> logs);
+
+    LogQueryResult queryLogs(LogQuery query);
+
+    LogDocument getLogById(String logId);
 
 }

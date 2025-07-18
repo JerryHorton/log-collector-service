@@ -3,7 +3,7 @@ package cn.cug.sxy.domain.reception.service.rule.chain.assembler;
 import cn.cug.sxy.domain.reception.model.entity.ReceptionDynamicContext;
 import cn.cug.sxy.domain.reception.model.valobj.ReceptionRequest;
 import cn.cug.sxy.domain.reception.model.valobj.ReceptionResult;
-import cn.cug.sxy.domain.reception.service.rule.chain.ILogicChain;
+import cn.cug.sxy.types.framework.chain.ILogicChain;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

@@ -47,6 +47,10 @@ public class LogAppAccess {
      */
     private Integer rateLimit;
     /**
+     * 突发容量（允许的短时间内最大请求数）
+     */
+    private int burstCapacity;
+    /**
      * 状态(ACTIVE/INACTIVE/BLOCKED)
      */
     private String status;

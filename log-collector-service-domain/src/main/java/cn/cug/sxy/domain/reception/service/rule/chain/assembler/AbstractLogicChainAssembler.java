@@ -1,6 +1,7 @@
 package cn.cug.sxy.domain.reception.service.rule.chain.assembler;
 
-import cn.cug.sxy.domain.reception.service.rule.chain.ILogicChain;
+import cn.cug.sxy.types.framework.chain.ILogicChain;
+import cn.cug.sxy.types.framework.chain.assembler.ILogicChainAssembler;
 
 import java.util.Map;
 

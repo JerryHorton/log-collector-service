@@ -15,4 +15,6 @@ public interface ILogAppAccessDao {
 
     LogAppAccess selectById(String appId);
 
+    LogAppAccess selectByAccessKey(String accessKey);
+
 }

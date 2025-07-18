@@ -22,9 +22,9 @@ public class ReceptionRequest implements ValueObject {
 
     private final List<RawLog> rawLog;
 
-    private final AppId appId;
+    private final String appId;
 
-    private EndpointId endpointId;
+    private String endpointId;
 
     @Override
     public boolean equals(Object o) {

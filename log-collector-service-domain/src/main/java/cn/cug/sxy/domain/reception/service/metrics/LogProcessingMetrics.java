@@ -1,7 +1,5 @@
 package cn.cug.sxy.domain.reception.service.metrics;
 
-import cn.cug.sxy.domain.reception.model.valobj.AppId;
-import cn.cug.sxy.domain.reception.model.valobj.EndpointId;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -41,14 +39,14 @@ public class LogProcessingMetrics {
     /**
      * 生成指标键
      */
-    private String getMetricKey(AppId appId, EndpointId endpointId) {
-        return appId.getValue() + ":" + endpointId.getValue();
+    private String getMetricKey(String appId, String endpointId) {
+        return appId + ":" + endpointId;
     }
     
     /**
      * 记录接收日志
      */
-    public void recordLogReceived(AppId appId, EndpointId endpointId, int count) {
+    public void recordLogReceived(String appId, String endpointId, int count) {
         String key = getMetricKey(appId, endpointId);
         receivedLogCounter.computeIfAbsent(key, k -> new LongAdder()).add(count);
     }
@@ -56,7 +54,7 @@ public class LogProcessingMetrics {
     /**
      * 记录接收批次
      */
-    public void recordBatchReceived(AppId appId, EndpointId endpointId) {
+    public void recordBatchReceived(String appId, String endpointId) {
         String key = getMetricKey(appId, endpointId);
         receivedBatchCounter.computeIfAbsent(key, k -> new LongAdder()).increment();
     }
@@ -64,7 +62,7 @@ public class LogProcessingMetrics {
     /**
      * 记录处理成功
      */
-    public void recordProcessSuccess(AppId appId, EndpointId endpointId, int logCount, long processingTimeMs) {
+    public void recordProcessSuccess(String appId, String endpointId, int logCount, long processingTimeMs) {
         String key = getMetricKey(appId, endpointId);
         processedSuccessCounter.computeIfAbsent(key, k -> new LongAdder()).add(logCount);
         
@@ -75,7 +73,7 @@ public class LogProcessingMetrics {
     /**
      * 记录处理失败
      */
-    public void recordProcessFailure(AppId appId, EndpointId endpointId) {
+    public void recordProcessFailure(String appId, String endpointId) {
         String key = getMetricKey(appId, endpointId);
         processedFailureCounter.computeIfAbsent(key, k -> new LongAdder()).increment();
     }
@@ -83,7 +81,7 @@ public class LogProcessingMetrics {
     /**
      * 记录重试
      */
-    public void recordRetry(AppId appId, EndpointId endpointId) {
+    public void recordRetry(String appId, String endpointId) {
         String key = getMetricKey(appId, endpointId);
         retryCounter.computeIfAbsent(key, k -> new LongAdder()).increment();
     }
@@ -117,7 +115,7 @@ public class LogProcessingMetrics {
     /**
      * 获取接收日志计数
      */
-    public long getReceivedLogCount(AppId appId, EndpointId endpointId) {
+    public long getReceivedLogCount(String appId, String endpointId) {
         String key = getMetricKey(appId, endpointId);
         LongAdder counter = receivedLogCounter.get(key);
         return counter != null ? counter.sum() : 0;
@@ -126,7 +124,7 @@ public class LogProcessingMetrics {
     /**
      * 获取接收批次计数
      */
-    public long getReceivedBatchCount(AppId appId, EndpointId endpointId) {
+    public long getReceivedBatchCount(String appId, String endpointId) {
         String key = getMetricKey(appId, endpointId);
         LongAdder counter = receivedBatchCounter.get(key);
         return counter != null ? counter.sum() : 0;
@@ -135,7 +133,7 @@ public class LogProcessingMetrics {
     /**
      * 获取处理成功计数
      */
-    public long getProcessedSuccessCount(AppId appId, EndpointId endpointId) {
+    public long getProcessedSuccessCount(String appId, String endpointId) {
         String key = getMetricKey(appId, endpointId);
         LongAdder counter = processedSuccessCounter.get(key);
         return counter != null ? counter.sum() : 0;
@@ -144,7 +142,7 @@ public class LogProcessingMetrics {
     /**
      * 获取处理失败计数
      */
-    public long getProcessedFailureCount(AppId appId, EndpointId endpointId) {
+    public long getProcessedFailureCount(String appId, String endpointId) {
         String key = getMetricKey(appId, endpointId);
         LongAdder counter = processedFailureCounter.get(key);
         return counter != null ? counter.sum() : 0;
@@ -153,7 +151,7 @@ public class LogProcessingMetrics {
     /**
      * 获取重试计数
      */
-    public long getRetryCount(AppId appId, EndpointId endpointId) {
+    public long getRetryCount(String appId, String endpointId) {
         String key = getMetricKey(appId, endpointId);
         LongAdder counter = retryCounter.get(key);
         return counter != null ? counter.sum() : 0;
@@ -162,7 +160,7 @@ public class LogProcessingMetrics {
     /**
      * 获取平均处理耗时
      */
-    public double getAverageProcessingTime(AppId appId, EndpointId endpointId) {
+    public double getAverageProcessingTime(String appId, String endpointId) {
         String key = getMetricKey(appId, endpointId);
         AtomicLong total = processingTimeTotal.get(key);
         LongAdder count = processingTimeCount.get(key);
@@ -177,7 +175,7 @@ public class LogProcessingMetrics {
     /**
      * 获取最大处理耗时
      */
-    public long getMaxProcessingTime(AppId appId, EndpointId endpointId) {
+    public long getMaxProcessingTime(String appId, String endpointId) {
         String key = getMetricKey(appId, endpointId);
         AtomicLong max = processingTimeMax.get(key);
         return max != null ? max.get() : 0;
@@ -186,7 +184,7 @@ public class LogProcessingMetrics {
     /**
      * 获取最小处理耗时
      */
-    public long getMinProcessingTime(AppId appId, EndpointId endpointId) {
+    public long getMinProcessingTime(String appId, String endpointId) {
         String key = getMetricKey(appId, endpointId);
         AtomicLong min = processingTimeMin.get(key);
         return min != null ? min.get() : 0;

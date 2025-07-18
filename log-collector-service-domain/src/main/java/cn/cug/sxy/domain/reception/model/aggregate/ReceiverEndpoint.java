@@ -69,10 +69,6 @@ public class ReceiverEndpoint implements AggregateRoot<EndpointId> {
      */
     private Set<String> allowedAppIds;
     /**
-     * 应用访问控制列表
-     */
-    private List<AppAccess> appAccesses;
-    /**
      * 最大批次数量
      */
     private int maxBatchCount;
@@ -107,7 +103,6 @@ public class ReceiverEndpoint implements AggregateRoot<EndpointId> {
         this.compressionEnabled = false;
         this.status = EndpointStatus.INACTIVE;
         this.allowedAppIds = new HashSet<>();
-        this.appAccesses = new ArrayList<>();
         this.maxBatchCount = 1000; // 默认最大批次数量
         this.bufferingEnabled = false;
         this.bufferingTimeMs = 1000; // 默认1秒
@@ -196,20 +191,6 @@ public class ReceiverEndpoint implements AggregateRoot<EndpointId> {
     }
 
     /**
-     * 添加应用访问控制
-     */
-    public void addAppAccess(AppAccess appAccess) {
-        this.appAccesses.add(appAccess);
-    }
-
-    /**
-     * 移除应用访问控制
-     */
-    public void removeAppAccess(AppAccess appAccess) {
-        this.appAccesses.remove(appAccess);
-    }
-
-    /**
      * 设置最大批次数量
      */
     public void setMaxBatchCount(int maxBatchCount) {
@@ -248,7 +229,7 @@ public class ReceiverEndpoint implements AggregateRoot<EndpointId> {
         this.bufferingEnabled = false;
     }
 
-    public EndpointId getAppId() {
+    public EndpointId getEndpointId() {
         return id;
     }
 

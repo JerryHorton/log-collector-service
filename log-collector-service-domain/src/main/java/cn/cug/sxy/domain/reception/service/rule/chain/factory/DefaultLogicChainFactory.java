@@ -1,7 +1,7 @@
 package cn.cug.sxy.domain.reception.service.rule.chain.factory;
 
-import cn.cug.sxy.domain.reception.service.rule.chain.ILogicChain;
-import cn.cug.sxy.domain.reception.service.rule.chain.assembler.ILogicChainAssembler;
+import cn.cug.sxy.types.framework.chain.ILogicChain;
+import cn.cug.sxy.types.framework.chain.assembler.ILogicChainAssembler;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.stereotype.Component;

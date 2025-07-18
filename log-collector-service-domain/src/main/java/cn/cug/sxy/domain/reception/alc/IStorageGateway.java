@@ -1,6 +1,6 @@
 package cn.cug.sxy.domain.reception.alc;
 
-import cn.cug.sxy.domain.reception.model.entity.LogBatch;
+import cn.cug.sxy.domain.reception.model.entity.LogBatchEntity;
 import cn.cug.sxy.domain.reception.model.valobj.BatchId;
 import cn.cug.sxy.domain.reception.model.valobj.ProcessedLog;
 import lombok.Getter;
@@ -24,7 +24,7 @@ public interface IStorageGateway {
      * @param processedLogs 处理后的日志列表
      * @return 存储结果，包含批次跟踪ID
      */
-    BatchStorageResult storeBatch(LogBatch batch, List<ProcessedLog> processedLogs);
+    BatchStorageResult storeBatch(LogBatchEntity batch, List<ProcessedLog> processedLogs);
 
     /**
      * 异步存储日志批次
@@ -33,7 +33,7 @@ public interface IStorageGateway {
      * @param processedLogs 处理后的日志列表
      * @return 异步存储结果
      */
-    CompletableFuture<BatchStorageResult> storeBatchAsync(LogBatch batch, List<ProcessedLog> processedLogs);
+    CompletableFuture<BatchStorageResult> storeBatchAsync(LogBatchEntity batch, List<ProcessedLog> processedLogs);
 
     /**
      * 确认批次是否已存储

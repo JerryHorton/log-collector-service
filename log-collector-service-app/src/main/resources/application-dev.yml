@@ -17,7 +17,7 @@ spring:
   datasource:
     username: root
     password: 123456
-    url: jdbc:mysql://127.0.0.1:3306/xfg_frame_archetype?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
+    url: jdbc:mysql://127.0.0.1:13306/log_collector?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=UTC&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
   hikari:
     pool-name: Retail_HikariCP
@@ -30,10 +30,45 @@ spring:
     connection-test-query: SELECT 1
   type: com.zaxxer.hikari.HikariDataSource
 
+# Redis
+redis:
+  sdk:
+    config:
+      host: 127.0.0.1
+      port: 16379
+      pool-size: 50
+      min-idle-size: 10
+      idle-timeout: 30000
+      connect-timeout: 5000
+      retry-attempts: 3
+      retry-interval: 1000
+      ping-interval: 60000
+      keep-alive: true
+
 # MyBatis 配置【如需使用记得打开】
-#mybatis:
-#  mapper-locations: classpath:/mybatis/mapper/*.xml
-#  config-location:  classpath:/mybatis/config/mybatis-config.xml
+mybatis:
+  mapper-locations: classpath:/mybatis/mapper/*.xml
+  config-location: classpath:/mybatis/config/mybatis-config.xml
+
+# ElasticSearch配置
+elasticsearch:
+  host: localhost
+  port: 9200
+  protocol: http
+  index-prefix: logs
+  # 动态字段配置
+  dynamic-fields:
+    enabled: true
+  # 字段刷新间隔 (5分钟)
+  field-refresh-interval-ms: 300000
+  cache:
+    local-expiration-ms: 60000
+    redis-expiration-ms: 600000
+
+# Logstash配置
+logstash:
+  host: localhost
+  port: 5044
 
 # 日志
 logging:

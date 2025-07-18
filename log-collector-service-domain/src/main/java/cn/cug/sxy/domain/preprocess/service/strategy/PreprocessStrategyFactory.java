@@ -52,4 +52,5 @@ public class PreprocessStrategyFactory {
     public boolean supportsFormat(LogFormat format) {
         return strategyMap.containsKey(format);
     }
+
 } 

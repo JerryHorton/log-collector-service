@@ -38,4 +38,5 @@ public abstract class AbstractPreprocessStrategy implements IPreprocessStrategy 
         // 默认不支持批量处理
         return false;
     }
+
 } 

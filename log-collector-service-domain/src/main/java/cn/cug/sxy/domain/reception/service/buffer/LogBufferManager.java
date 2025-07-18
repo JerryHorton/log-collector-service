@@ -1,7 +1,7 @@
 package cn.cug.sxy.domain.reception.service.buffer;
 
 import cn.cug.sxy.domain.reception.adapter.repository.ILogBatchRepository;
-import cn.cug.sxy.domain.reception.model.entity.LogBatch;
+import cn.cug.sxy.domain.reception.model.entity.LogBatchEntity;
 import cn.cug.sxy.domain.reception.model.valobj.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -68,7 +68,7 @@ public class LogBufferManager implements InitializingBean, DisposableBean {
      * 批次处理回调
      */
     @Setter
-    private Consumer<BatchId> batchProcessCallback;
+    private Consumer<LogBatchEntity> batchProcessCallback;
 
     public LogBufferManager(ILogBatchRepository logBatchRepository) {
         this.logBatchRepository = logBatchRepository;
@@ -82,9 +82,8 @@ public class LogBufferManager implements InitializingBean, DisposableBean {
      * @param endpointId 端点ID
      * @return 是否触发了刷新
      */
-    public boolean addLog(RawLog rawLog, AppId appId, EndpointId endpointId) {
+    public boolean addLog(RawLog rawLog, String appId, String endpointId) {
         String key = generateBufferKey(appId, endpointId);
-
         // 获取或创建缓冲区
         LogBuffer buffer = buffers.computeIfAbsent(key, k ->
                 new LogBuffer(appId, endpointId, Instant.now()));
@@ -128,13 +127,13 @@ public class LogBufferManager implements InitializingBean, DisposableBean {
         }
         try {
             List<RawLog> logs = buffer.getLogs();
-            AppId appId = buffer.getAppId();
-            EndpointId endpointId = buffer.getEndpointId();
+            String appId = buffer.getAppId();
+            String endpointId = buffer.getEndpointId();
             log.debug("刷新日志缓冲区: appId={}, endpointId={}, logCount={}",
-                    appId.getValue(), endpointId.getValue(), logs.size());
+                    appId, endpointId, logs.size());
             // 创建批次
             BatchId batchId = BatchId.generate();
-            LogBatch batch = new LogBatch(
+            LogBatchEntity batch = new LogBatchEntity(
                     batchId,
                     appId,
                     endpointId,
@@ -146,7 +145,7 @@ public class LogBufferManager implements InitializingBean, DisposableBean {
             logBatchRepository.save(batch);
             // 触发批次处理回调
             if (batchProcessCallback != null) {
-                batchProcessCallback.accept(batchId);
+                batchProcessCallback.accept(batch);
             }
         } catch (Exception e) {
             log.error("刷新日志缓冲区异常: key={}", key, e);
@@ -186,8 +185,8 @@ public class LogBufferManager implements InitializingBean, DisposableBean {
     /**
      * 生成缓冲区键
      */
-    private String generateBufferKey(AppId appId, EndpointId endpointId) {
-        return appId.getValue() + ":" + endpointId.getValue();
+    private String generateBufferKey(String appId, String endpointId) {
+        return appId + ":" + endpointId;
     }
 
     /**
@@ -195,12 +194,12 @@ public class LogBufferManager implements InitializingBean, DisposableBean {
      */
     @Getter
     private static class LogBuffer {
-        private final AppId appId;
-        private final EndpointId endpointId;
+        private final String appId;
+        private final String endpointId;
         private final List<RawLog> logs = new ArrayList<>();
         private final Instant creationTime;
 
-        public LogBuffer(AppId appId, EndpointId endpointId, Instant creationTime) {
+        public LogBuffer(String appId, String endpointId, Instant creationTime) {
             this.appId = appId;
             this.endpointId = endpointId;
             this.creationTime = creationTime;

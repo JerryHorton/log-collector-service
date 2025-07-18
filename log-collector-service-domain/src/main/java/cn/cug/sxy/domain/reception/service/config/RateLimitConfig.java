@@ -1,7 +1,5 @@
 package cn.cug.sxy.domain.reception.service.config;
 
-import cn.cug.sxy.domain.reception.model.valobj.AppId;
-import cn.cug.sxy.domain.reception.model.valobj.EndpointId;
 import lombok.Getter;
 
 /**
@@ -11,10 +9,10 @@ import lombok.Getter;
 public class RateLimitConfig {
 
     // 应用ID
-    private final AppId appId;
+    private final String appId;
 
     // 端点ID
-    private final EndpointId endpointId;
+    private final String endpointId;
 
     // 限流速率（次/秒）
     private final int rateLimit;
@@ -25,7 +23,7 @@ public class RateLimitConfig {
     // 是否启用限流
     private final boolean enabled;
 
-    public RateLimitConfig(AppId appId, EndpointId endpointId, int rateLimit, int burstCapacity) {
+    public RateLimitConfig(String appId, String endpointId, int rateLimit, int burstCapacity) {
         this.appId = appId;
         this.endpointId = endpointId;
         this.rateLimit = rateLimit;

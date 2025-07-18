@@ -1,9 +1,9 @@
 package cn.cug.sxy.domain.reception.adapter.repository;
 
-import cn.cug.sxy.domain.reception.model.aggregate.AppAccess;
-import cn.cug.sxy.domain.reception.model.valobj.AccessKey;
-import cn.cug.sxy.domain.reception.model.valobj.AppAccessStatus;
-import cn.cug.sxy.domain.reception.model.valobj.AppId;
+import cn.cug.sxy.domain.auth.model.entity.AppAccess;
+import cn.cug.sxy.domain.auth.model.valobj.AccessKey;
+import cn.cug.sxy.domain.auth.model.valobj.AppAccessStatus;
+import cn.cug.sxy.domain.auth.model.valobj.AppId;
 
 import java.util.List;
 import java.util.Optional;

@@ -3,14 +3,14 @@ package cn.cug.sxy.domain.reception.service;
 import cn.cug.sxy.domain.reception.adapter.repository.ILogBatchRepository;
 import cn.cug.sxy.domain.reception.alc.IPreprocessGateway;
 import cn.cug.sxy.domain.reception.alc.IStorageGateway;
-import cn.cug.sxy.domain.reception.model.entity.LogBatch;
+import cn.cug.sxy.domain.reception.model.entity.LogBatchEntity;
 import cn.cug.sxy.domain.reception.model.valobj.BatchId;
 import cn.cug.sxy.domain.reception.model.valobj.BatchStatus;
 import cn.cug.sxy.domain.reception.model.valobj.ProcessedLog;
 import cn.cug.sxy.domain.reception.service.metrics.LogProcessingMetrics;
 import cn.cug.sxy.types.exception.AppException;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,10 +37,6 @@ public class BatchProcessingService implements IBatchProcessingService {
     private final IPreprocessGateway preprocessGateway;
     private final LogProcessingMetrics metrics;
 
-    // 自我注入，用于解决事务方法自调用问题
-    @Resource
-    private BatchProcessingService self;
-
     // 重试配置
     private static final int MAX_RETRY_COUNT = 3;
     private static final long RETRY_INTERVAL_MS = 1000;
@@ -57,19 +53,19 @@ public class BatchProcessingService implements IBatchProcessingService {
     }
 
     @Override
-    public void processBatchAsync(BatchId batchId) {
-        if (batchId == null) {
-            log.error("批次ID为空，无法处理");
+    public void processBatchAsync(LogBatchEntity batchEntity) {
+        if (batchEntity == null) {
+            log.error("批次为空，无法处理");
             return;
         }
+        BatchId batchId = batchEntity.getId();
         int retryCount = 0;
         boolean success = false;
         Exception lastException = null;
-
         while (retryCount <= MAX_RETRY_COUNT && !success) {
             try {
                 // 1. 检查批次是否存在并获取批次信息 (只读事务)
-                LogBatch batch = fetchAndValidateBatch(batchId);
+                LogBatchEntity batch = fetchAndValidateBatch(batchEntity);
                 if (batch == null) {
                     return; // 批次不存在或已处理完成
                 }
@@ -99,45 +95,45 @@ public class BatchProcessingService implements IBatchProcessingService {
         }
         // 如果重试后仍然失败，标记批次为最终失败 (独立事务)
         if (!success && retryCount > MAX_RETRY_COUNT) {
-            self.handleFinalFailure(batchId, lastException);
+            BatchProcessingService proxy = (BatchProcessingService) AopContext.currentProxy();
+            proxy.handleFinalFailure(batchId, lastException);
         }
     }
 
     /**
      * 获取并校验批次
      *
-     * @param batchId 批次ID
+     * @param logBatchEntity 批次
      * @return 批次对象，如果批次不存在或已经处理完成则返回null
      */
-    public LogBatch fetchAndValidateBatch(BatchId batchId) {
+    public LogBatchEntity fetchAndValidateBatch(LogBatchEntity logBatchEntity) {
         // 查询批次
-        Optional<LogBatch> batchOpt = logBatchRepository.findById(batchId);
+        BatchId batchId = logBatchEntity.getId();
+        Optional<LogBatchEntity> batchOpt = logBatchRepository.findByBatchId(batchId);
         if (!batchOpt.isPresent()) {
             log.error("异步处理批次失败: 批次不存在, batchId={}", batchId.getValue());
             return null;
         }
-
-        LogBatch batch = batchOpt.get();
-
+        LogBatchEntity batch = batchOpt.get();
+        batch.setLogs(logBatchEntity.getLogs());
         // 幂等性检查 - 如果批次已经处理完成，直接返回成功
         if (batch.getStatus() == BatchStatus.PROCESSED) {
             log.info("批次已处理，跳过: batchId={}", batchId.getValue());
             return null;
         }
-
         // 如果批次已经失败且已达到最大重试次数，不再处理
         if (batch.getStatus() == BatchStatus.FAILED && batch.getRetryCount() >= MAX_RETRY_COUNT) {
             log.warn("批次处理失败且已达到最大重试次数，不再处理: batchId={}, retryCount={}",
                     batchId.getValue(), batch.getRetryCount());
             return null;
         }
-
         // 检查批次是否已经被存储领域处理（幂等性检查）
         if (storageGateway.isBatchStored(batchId)) {
             log.info("批次已被存储领域处理，标记为已处理: batchId={}", batchId.getValue());
             try {
                 // 使用独立事务更新状态，确保本次检查与更新的数据一致性
-                self.updateBatchAsAlreadyStored(batchId);
+                BatchProcessingService proxy = (BatchProcessingService) AopContext.currentProxy();
+                proxy.updateBatchAsAlreadyStored(batchId);
             } catch (Exception e) {
                 log.error("更新批次状态失败: batchId={}, error={}", batchId.getValue(), e.getMessage(), e);
                 // 即使更新失败，也认为批次已处理，防止重复处理
@@ -173,23 +169,23 @@ public class BatchProcessingService implements IBatchProcessingService {
      * @param retryCount 当前重试次数
      * @return 是否处理成功
      */
-    private boolean processLogBatch(LogBatch batch, int retryCount) {
+    private boolean processLogBatch(LogBatchEntity batch, int retryCount) {
         BatchId batchId = batch.getId();
-
         try {
             // 1. 更新批次状态为处理中 (独立事务)
-            self.updateBatchToProcessing(batchId, retryCount);
+            BatchProcessingService proxy = (BatchProcessingService) AopContext.currentProxy();
+            proxy.updateBatchToProcessing(batchId, retryCount);
             // 2. 预处理和验证日志 (非事务操作，纯内存处理)
             List<ProcessedLog> validLogs = preprocessAndValidateLogs(batch);
             if (validLogs.isEmpty()) {
                 // 没有有效日志，直接标记为处理完成 (独立事务)
-                self.markBatchAsProcessed(batchId);
+                proxy.markBatchAsProcessed(batchId);
                 return true;
             }
             // 3. 将日志批次传递给下游存储领域 (非事务操作，外部系统调用)
             IStorageGateway.BatchStorageResult storageResult = storeLogBatch(batch, validLogs);
             // 4. 处理完成后更新批次状态 (独立事务)
-            self.updateProcessedBatchStatus(batchId, storageResult.getBatchTraceId());
+            proxy.updateProcessedBatchStatus(batchId, storageResult.getBatchTraceId());
             // 5. 发布事件并记录度量指标 (非事务操作或独立事务)
             publishSuccessEventAndMetrics(batchId, validLogs.size(), storageResult.getBatchTraceId());
 
@@ -230,19 +226,16 @@ public class BatchProcessingService implements IBatchProcessingService {
      * @param batch 日志批次
      * @return 处理后的有效日志列表，如果没有有效日志则返回空列表
      */
-    private List<ProcessedLog> preprocessAndValidateLogs(LogBatch batch) {
+    private List<ProcessedLog> preprocessAndValidateLogs(LogBatchEntity batch) {
         try {
             // 1. 日志预处理 - 格式转换、字段提取等
             List<ProcessedLog> processedLogs = preprocessLogs(batch);
-
             // 2. todo 日志验证 - 应用业务规则链
-
 
             // 过滤出验证通过的日志
             List<ProcessedLog> validLogs = processedLogs.stream()
                     .filter(ProcessedLog::isValidated)
                     .collect(Collectors.toList());
-
             if (validLogs.isEmpty()) {
                 log.warn("批次中没有有效日志，标记为处理完成: batchId={}", batch.getId().getValue());
                 return Collections.emptyList();
@@ -263,11 +256,10 @@ public class BatchProcessingService implements IBatchProcessingService {
      * @param validLogs 有效的日志列表
      * @return 存储结果
      */
-    private IStorageGateway.BatchStorageResult storeLogBatch(LogBatch batch, List<ProcessedLog> validLogs) {
+    private IStorageGateway.BatchStorageResult storeLogBatch(LogBatchEntity batch, List<ProcessedLog> validLogs) {
         try {
             // 调用存储适配器存储批次
             IStorageGateway.BatchStorageResult storageResult = storageGateway.storeBatch(batch, validLogs);
-
             if (!storageResult.isSuccess()) {
                 throw new AppException("批次传输到存储领域失败: " + storageResult.getErrorMessage());
             }
@@ -334,9 +326,9 @@ public class BatchProcessingService implements IBatchProcessingService {
     public void publishSuccessEventAndMetrics(BatchId batchId, int validLogCount, String batchTraceId) {
         try {
             // 重新获取完整实体用于事件发布和指标记录
-            Optional<LogBatch> batchOpt = logBatchRepository.findById(batchId);
+            Optional<LogBatchEntity> batchOpt = logBatchRepository.findByBatchId(batchId);
             if (batchOpt.isPresent()) {
-                LogBatch batch = batchOpt.get();
+                LogBatchEntity batch = batchOpt.get();
 
                 // todo 发布批次处理完成事件 (异步操作，不影响事务)
 
@@ -389,7 +381,7 @@ public class BatchProcessingService implements IBatchProcessingService {
      * @param batchId 批次ID
      */
     public void recordRetryMetrics(BatchId batchId) {
-        Optional<LogBatch> batchOpt = logBatchRepository.findById(batchId);
+        Optional<LogBatchEntity> batchOpt = logBatchRepository.findByBatchId(batchId);
         if (batchOpt.isPresent()) {
             metrics.recordRetry(batchOpt.get().getAppId(), batchOpt.get().getEndpointId());
         }
@@ -424,9 +416,9 @@ public class BatchProcessingService implements IBatchProcessingService {
     public void recordFailureAndNotify(BatchId batchId, Exception exception) {
         try {
             // 重新获取完整实体用于事件发布和指标记录
-            Optional<LogBatch> batchOpt = logBatchRepository.findById(batchId);
+            Optional<LogBatchEntity> batchOpt = logBatchRepository.findByBatchId(batchId);
             if (batchOpt.isPresent()) {
-                LogBatch batch = batchOpt.get();
+                LogBatchEntity batch = batchOpt.get();
                 // 记录失败指标
                 metrics.recordProcessFailure(batch.getAppId(), batch.getEndpointId());
                 // 通知处理失败
@@ -445,7 +437,7 @@ public class BatchProcessingService implements IBatchProcessingService {
      * @param batch 日志批次
      * @return 处理后的日志列表
      */
-    private List<ProcessedLog> preprocessLogs(LogBatch batch) {
+    private List<ProcessedLog> preprocessLogs(LogBatchEntity batch) {
         // 通过预处理适配器处理日志批次
         return preprocessGateway.preprocessFromBatch(batch);
     }
@@ -456,12 +448,12 @@ public class BatchProcessingService implements IBatchProcessingService {
      * @param batch     日志批次
      * @param exception 异常信息
      */
-    private void notifyProcessingFailure(LogBatch batch, Exception exception) {
+    private void notifyProcessingFailure(LogBatchEntity batch, Exception exception) {
         // TODO: 实现告警通知逻辑，如发送邮件、短信、钉钉等
         log.error("需要人工干预的批次处理失败: batchId={}, appId={}, endpointId={}, error={}",
                 batch.getId().getValue(),
-                batch.getAppId().getValue(),
-                batch.getEndpointId().getValue(),
+                batch.getAppId(),
+                batch.getEndpointId(),
                 exception != null ? exception.getMessage() : "未知错误");
     }
 

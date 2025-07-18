@@ -1,7 +1,7 @@
 package cn.cug.sxy.domain.reception.service.cleanup;
 
 import cn.cug.sxy.domain.reception.adapter.repository.ILogBatchRepository;
-import cn.cug.sxy.domain.reception.model.entity.LogBatch;
+import cn.cug.sxy.domain.reception.model.entity.LogBatchEntity;
 import cn.cug.sxy.domain.reception.model.valobj.BatchStatus;
 import cn.cug.sxy.domain.reception.service.config.CleanupConfig;
 import jakarta.annotation.PostConstruct;
@@ -79,13 +79,13 @@ public class BatchCleanupService {
         Instant threshold = Instant.now().minus(cleanupConfig.getProcessedRetentionHours(), ChronoUnit.HOURS);
         
         // 查询需要清理的批次
-        List<LogBatch> batches = batchRepository.findByStatusAndProcessedTimeBefore(BatchStatus.PROCESSED, threshold);
+        List<LogBatchEntity> batches = batchRepository.findByStatusAndProcessedTimeBefore(BatchStatus.PROCESSED, threshold);
         
         if (!batches.isEmpty()) {
             log.info("清理已处理完成的批次，数量={}", batches.size());
             
             // 删除批次
-            for (LogBatch batch : batches) {
+            for (LogBatchEntity batch : batches) {
                 batchRepository.delete(batch);
             }
         }
@@ -97,15 +97,12 @@ public class BatchCleanupService {
     private void cleanupFailedBatches() {
         // 计算清理阈值时间
         Instant threshold = Instant.now().minus(cleanupConfig.getFailedRetentionHours(), ChronoUnit.HOURS);
-        
         // 查询需要清理的批次
-        List<LogBatch> batches = batchRepository.findByStatusAndLastProcessTimeBefore(BatchStatus.FAILED, threshold);
-        
+        List<LogBatchEntity> batches = batchRepository.findByStatusAndLastProcessTimeBefore(BatchStatus.FAILED, threshold);
         if (!batches.isEmpty()) {
             log.info("清理处理失败的批次，数量={}", batches.size());
-            
             // 删除批次
-            for (LogBatch batch : batches) {
+            for (LogBatchEntity batch : batches) {
                 batchRepository.delete(batch);
             }
         }
@@ -117,15 +114,13 @@ public class BatchCleanupService {
     private void cleanupTimeoutBatches() {
         // 计算清理阈值时间
         Instant threshold = Instant.now().minus(cleanupConfig.getTimeoutMinutes(), ChronoUnit.MINUTES);
-        
         // 查询需要清理的批次
-        List<LogBatch> batches = batchRepository.findByStatusAndLastProcessTimeBefore(BatchStatus.PROCESSING, threshold);
-        
+        List<LogBatchEntity> batches = batchRepository.findByStatusAndLastProcessTimeBefore(BatchStatus.PROCESSING, threshold);
         if (!batches.isEmpty()) {
             log.info("清理超时的批次，数量={}", batches.size());
             
             // 将超时批次标记为失败
-            for (LogBatch batch : batches) {
+            for (LogBatchEntity batch : batches) {
                 batch.markAsFailed("处理超时");
                 batchRepository.save(batch);
             }

@@ -1,7 +1,7 @@
 package cn.cug.sxy.domain.reception.alc;
 
-import cn.cug.sxy.domain.reception.model.entity.LogBatch;
-import cn.cug.sxy.domain.reception.model.valobj.AppId;
+import cn.cug.sxy.domain.reception.model.entity.LogBatchEntity;
+import cn.cug.sxy.domain.auth.model.valobj.AppId;
 import cn.cug.sxy.domain.reception.model.valobj.EndpointId;
 import cn.cug.sxy.domain.reception.model.valobj.ProcessedLog;
 import cn.cug.sxy.domain.reception.model.valobj.RawLog;
@@ -43,6 +43,6 @@ public interface IPreprocessGateway {
      * @param batch 日志批次
      * @return 处理后的日志列表
      */
-    List<ProcessedLog> preprocessFromBatch(LogBatch batch);
+    List<ProcessedLog> preprocessFromBatch(LogBatchEntity batch);
 
 }
